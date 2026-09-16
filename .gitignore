@@ -1,0 +1,16 @@
+# Root ignores (game/.gitignore also applies under game/)
+.DS_Store
+Thumbs.db
+*.pem
+.env*
+.openai/
+qa_render/
+**/node_modules/
+**/.next/
+**/.vinext/
+**/.wrangler/
+**/dist/
+**/.site-package-stage*/
+**/site*.tar.gz
+**/tsconfig.tsbuildinfo
+**/next-env.d.ts
