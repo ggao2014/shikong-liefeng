@@ -1915,7 +1915,7 @@ export default function HomePage() {
     setStudyFocus(id);
     setCourseProgressMap(v=>({...v,[id]:v[id]??0}));
     setTimeline(v=>[{week,title:`选修${course.title}`,text:`${course.school} · ${meetingLabel(course.meetings)}。书目《${getBook(course.bookId)?.title??''}》。`,kind:'study'},...v]);
-    grant(['first-course']);
+    if(next.length>=2)grant(['first-course']);
   }
   function dropCourse(id:string) {
     if(!isAddDropWeek(weekOfYear)||!enrolled.includes(id))return;
