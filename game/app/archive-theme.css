@@ -1689,6 +1689,7 @@ main.min-h-screen {
   position: relative;
   width: min(100cqw, calc(100cqh * 1024 / 682));
   aspect-ratio: 1024 / 682;
+  background: url('/town-map.png') center / 100% 100% no-repeat;
 }
 .town-map-board img {
   display: block;

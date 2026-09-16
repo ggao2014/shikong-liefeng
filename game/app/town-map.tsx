@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
 
 export type TownPlaceId = 'cottage' | 'library' | 'university' | 'station' | 'magicAcademy';
@@ -30,7 +29,7 @@ export function TownMapView({ onBack, onEnter, magicUnlocked = false }: { onBack
     <section className="town-map" aria-label="榛木镇">
       {onBack && <button type="button" className="btn-ghost room-back map-back" onClick={onBack}>返回</button>}
       <div className="town-map-board">
-        <Image src="/town-map.png" alt="榛木镇" width={1024} height={682} priority />
+        <img src="/town-map.png" alt="榛木镇" width={1024} height={682} decoding="async" />
         {!magicUnlocked && mountainHintKey > 0 && <p key={mountainHintKey} className="mountain-whisper" role="status">雾后似乎隐约可见一些建筑，又很快消失了。</p>}
         {places.map(place => (
           <button
