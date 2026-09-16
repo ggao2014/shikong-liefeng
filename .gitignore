@@ -3,7 +3,10 @@
 Thumbs.db
 *.pem
 .env*
-.openai/
+.openai/*
+!.openai/hosting.json
+game/.openai/*
+!game/.openai/hosting.json
 qa_render/
 **/node_modules/
 **/.next/
