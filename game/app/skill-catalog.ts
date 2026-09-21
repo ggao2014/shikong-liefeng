@@ -16,6 +16,8 @@ export type SkillDefinition = {
   bookIds: string[];
   facility?: string;
   facilityLabel?: string;
+  /** 为 true 时，没有对应设施就不提供日程选项、也不计入练习 */
+  requiresFacility?: boolean;
   initiallyAvailable?: boolean;
   prerequisites: Prerequisite[];
 };
@@ -41,7 +43,7 @@ export const skillCatalog: SkillDefinition[] = [
   { id: 'calligraphy', title: '书法', group: '艺术', schedule: 'project', courseId: 'calligraphy', bookIds: ['yuan-ye'], facility: 'study', facilityLabel: '书房', prerequisites: [{ kind: 'course', id: 'calligraphy', label: '完成书法课' }] },
   { id: 'craft', title: '工艺', group: '艺术', schedule: 'project', courseId: 'craft', bookIds: ['cup-handles', 'craftsman'], facility: 'studio', facilityLabel: '画室', prerequisites: [{ kind: 'course', id: 'craft', label: '完成工艺基础' }] },
   { id: 'composition', title: '作曲', group: '艺术', schedule: 'project', courseId: 'composition', bookIds: ['design-of-design', 'piano-practice'], facility: 'piano', facilityLabel: '琴房', prerequisites: [{ kind: 'course', id: 'composition', label: '完成作曲与作品分析' }] },
-  { id: 'cooking', title: '烹饪', group: '生活', schedule: 'rest', courseId: 'cooking', bookIds: ['home-cooking', 'local-table'], facility: 'kitchen', facilityLabel: '正经厨房', initiallyAvailable: true, prerequisites: [] },
+  { id: 'cooking', title: '烹饪', group: '生活', schedule: 'rest', courseId: 'cooking', bookIds: ['home-cooking', 'local-table'], facility: 'kitchen', facilityLabel: '正经厨房', requiresFacility: true, initiallyAvailable: true, prerequisites: [] },
   { id: 'english', title: '英语', group: '语言', schedule: 'rest', courseId: 'english', advanceCourseIds: ['english-2', 'english-3'], bookIds: ['mist-letters', 'to-lighthouse'], initiallyAvailable: true, prerequisites: [] },
   { id: 'french', title: '法语', group: '语言', schedule: 'rest', courseId: 'french', advanceCourseIds: ['french-2', 'french-3'], bookIds: ['far-return', 'to-lighthouse'], initiallyAvailable: true, prerequisites: [] },
   { id: 'spanish', title: '西班牙语', group: '语言', schedule: 'rest', courseId: 'spanish', advanceCourseIds: ['spanish-2', 'spanish-3'], bookIds: ['invisible-cities', 'morning-blossoms'], initiallyAvailable: true, prerequisites: [] },
@@ -77,6 +79,11 @@ export function isSkillId(value: string): value is SkillId {
 
 export function skillUnlocked(skill: SkillDefinition, completedCourses: string[], enrolledCourses: string[] = []) {
   return !!skill.initiallyAvailable || !skill.courseId || completedCourses.includes(skill.courseId) || (!!skill.courseId && enrolledCourses.includes(skill.courseId));
+}
+
+export function skillFacilityReady(skill: SkillDefinition, rooms: string[]) {
+  if (!skill.requiresFacility || !skill.facility) return true;
+  return rooms.includes(skill.facility);
 }
 
 export function skillPracticeCap(skill:SkillDefinition,completedCourses:string[],finishedBooks:string[],enrolledCourses:string[]=[]){

@@ -26,7 +26,7 @@ import { SEMESTER_CREDIT_CAP, academicTerm, buildDiploma, buildTermReport, close
 import { UniversityView } from './university-view';
 import { DiplomaModal, TermGradesModal } from './academic-modals';
 import { CelebrationModal, celebrateFromAchievements, celebrateFromTitles, type CelebrateItem } from './celebration-modals';
-import { activityForSkill, courseSkill, formatSkillAdvance, formatSkillRemaining, isSkillId, migrateFitnessOption, scaledSkillGain, skillById, skillCatalog, skillCapBreakthroughs, skillCourseGain, skillLevel, skillPracticeCap, skillPracticeGain, skillsOnSchedule, skillUnlocked, skillUpgradeRemaining, type SkillId } from './skill-catalog';
+import { activityForSkill, courseSkill, formatSkillAdvance, formatSkillRemaining, isSkillId, migrateFitnessOption, scaledSkillGain, skillById, skillCatalog, skillCapBreakthroughs, skillCourseGain, skillFacilityReady, skillLevel, skillPracticeCap, skillPracticeGain, skillsOnSchedule, skillUnlocked, skillUpgradeRemaining, type SkillId } from './skill-catalog';
 import { resolveSkillWeek, skillEffectShort, wellbeingActivityCounts, withSkillWellbeing, type SkillWeekResult } from './skill-effects';
 import { achievementById, skillAchievementIds, workAchievementIds } from './achievements';
 import { applyCreativeWeek, CREATIVE_SKILL_IDS, hydrateActiveWorks, hydrateArchivedWorks, isCreativeSkillId, workMenuDetail, type ActiveWork, type ArchivedWork, type CreativeSkillId } from './creative-works';
@@ -298,6 +298,7 @@ function practicePlanSkills(
     const skill = skillById[id];
     if (key !== 'skill' && key !== skill.schedule) return;
     if (!skillUnlocked(skill, completed, enrolled)) return;
+    if (!skillFacilityReady(skill, rooms)) return;
     const cap = skillPracticeCap(skill, completed, finishedBooks, enrolled);
     const current = next[id] ?? 0;
     next[id] = Math.min(cap, current + skillPracticeGain(skill, finishedBooks, rooms, current) * factor);
@@ -338,7 +339,7 @@ function skillGateLabels(skill: ReturnType<typeof skillsOnSchedule>[number]) {
   };
 }
 function skillMenuOptions(schedule: 'fitness' | 'project' | 'rest', completed: string[], progress: Partial<Record<SkillId, number>>, finishedBooks: string[], rooms: string[], enrolled: string[] = [], activeWorks?: Partial<Record<CreativeSkillId, ActiveWork>>): ActivityOption[] {
-  return skillsOnSchedule(schedule).filter(skill => skillUnlocked(skill, completed, enrolled)).map(skill => {
+  return skillsOnSchedule(schedule).filter(skill => skillUnlocked(skill, completed, enrolled) && skillFacilityReady(skill, rooms)).map(skill => {
     const value = progress[skill.id] ?? 0;
     const gain = skillPracticeGain(skill, finishedBooks, rooms, value);
     const cap = skillPracticeCap(skill, completed, finishedBooks, enrolled);
@@ -445,8 +446,9 @@ export default function HomePage() {
             next.free = 'game';
           }
           next.fitness = migrateFitnessOption(next.fitness || 'strength');
-          const restIds = new Set([...restOptions.map(item => item.id), ...skillsOnSchedule('rest').map(skill => skill.id)]);
-          const fitnessIds = new Set(['stretch', ...skillsOnSchedule('fitness').map(skill => skill.id)]);
+          const loadedRooms = roomsAtLevel(hydrateHouseLevel(s.houseLevel, s.rooms));
+          const restIds = new Set([...restOptions.map(item => item.id), ...skillsOnSchedule('rest').filter(skill => skillFacilityReady(skill, loadedRooms)).map(skill => skill.id)]);
+          const fitnessIds = new Set(['stretch', ...skillsOnSchedule('fitness').filter(skill => skillFacilityReady(skill, loadedRooms)).map(skill => skill.id)]);
           if (!restIds.has(next.rest ?? '')) next.rest = 'nap';
           if (!fitnessIds.has(next.fitness ?? '')) next.fitness = 'strength';
           if (isOutingLeisureId(next.free ?? '')) {
@@ -503,6 +505,20 @@ export default function HomePage() {
       return changed ? next : current;
     });
   }, [loaded, borrowedBooks, bookProgressMap, plan]);
+  useEffect(() => {
+    if (!loaded) return;
+    if (rooms.includes('kitchen')) return;
+    setSlotChoice(current => current.rest === 'cooking' ? { ...current, rest: 'nap' } : current);
+    setPlanChoice(current => {
+      let changed = false;
+      const next = current.map((row, di) => row.map((value, pi) => {
+        if (plan[di]?.[pi] !== 'rest' || value !== 'cooking') return value;
+        changed = true;
+        return 'nap';
+      }));
+      return changed ? next : current;
+    });
+  }, [loaded, rooms, plan]);
   const prevActiveProject = useRef<string | null | undefined>(undefined);
   useEffect(() => {
     if (!loaded) return;
