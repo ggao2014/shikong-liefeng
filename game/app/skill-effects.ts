@@ -1,4 +1,4 @@
-import { isSkillId, skillById, skillLevel, type SkillId } from './skill-catalog';
+import { isSkillId, skillById, skillFacilityReady, skillLevel, type SkillId } from './skill-catalog';
 import { CREATIVE_SKILL_IDS } from './creative-works';
 
 export type SkillWeekInput = {
@@ -43,7 +43,7 @@ export function cookingCoverPerSlot(skill = 0) {
   return 0.35 + skillFactor(skill) * 0.65;
 }
 
-export function countPracticedSkills(grid: string[][], choices: string[][]) {
+export function countPracticedSkills(grid: string[][], choices: string[][], rooms: string[] = []) {
   const practiced: Partial<Record<SkillId, number>> = {};
   let stretch = 0;
   grid.forEach((row, di) => row.forEach((_, pi) => {
@@ -53,6 +53,8 @@ export function countPracticedSkills(grid: string[][], choices: string[][]) {
       return;
     }
     if (!isSkillId(id)) return;
+    const skill = skillById[id];
+    if (!skillFacilityReady(skill, rooms)) return;
     practiced[id] = (practiced[id] ?? 0) + 1;
   }));
   return { practiced, stretch };
@@ -133,7 +135,7 @@ export function skillEffectLabel(id: SkillId, value: number, unlocked: boolean) 
     case 'craft': return `排进创作后做材料与器物练习，可有一点收入。当前（${level}）${perSlotLabel(id, value)}。`;
     case 'composition': return `排进创作后写动机与曲式草稿，减压。当前（${level}）。艺术类课题可从练习推进。`;
     case 'pottery': return `排进创作后减压，器物可有一点收入。当前（${level}）${perSlotLabel(id, value)}。完成后留档。`;
-    case 'cooking': return `排进宅家后自己做饭，按等级替代厨师。当前（${level}）${perSlotLabel(id, value)}。`;
+    case 'cooking': return `有正经厨房时，可排进宅家自己做饭，按等级替代厨师。当前（${level}）${perSlotLabel(id, value)}。`;
     case 'english':
     case 'french':
     case 'spanish':
@@ -143,7 +145,7 @@ export function skillEffectLabel(id: SkillId, value: number, unlocked: boolean) 
 }
 
 export function resolveSkillWeek(input: SkillWeekInput): SkillWeekResult {
-  const { practiced, stretch } = countPracticedSkills(input.grid, input.choices);
+  const { practiced, stretch } = countPracticedSkills(input.grid, input.choices, input.rooms);
   const result: SkillWeekResult = {
     energy: 0,
     stress: 0,
