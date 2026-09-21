@@ -65,6 +65,7 @@ export const achievementCatalog: AchievementDefinition[] = [
   { id: 'first-course', title: '第二门课', desc: '在读课程增至两门', reward: 70, level: '起步' },
   { id: 'first-trip', title: '首次出行', desc: '完成一次旅行', reward: 90, level: '里程碑' },
   { id: 'first-room', title: '第一间屋', desc: '在荒地上建起小破屋。', reward: 100, level: '里程碑' },
+  { id: 'first-kitchen', title: '可在家烹饪', desc: '正经厨房落成。可在宅家日程里排「烹饪」，自己做饭维持饱食，也能练习烹饪技能。', reward: 120, level: '里程碑' },
   { id: 'book-finished', title: '读完一书', desc: '任一书目进度达到 100', reward: 140, level: '长期' },
   { id: 'trusted-friend', title: '社交 50', desc: '社交度达到 50', reward: 180, level: '长期' },
   { id: 'five-books', title: '五书结档', desc: '读完五本书', reward: 220, level: '长期' },
