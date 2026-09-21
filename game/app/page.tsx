@@ -1538,7 +1538,10 @@ export default function HomePage() {
     setCleanliness(shifted.cleanliness);
     setGrounds(shifted.grounds);
     setTimeline(v=>[{week,title:`升级为 ${next.name}`,text:`${next.sqft}。${addedRoomNames(next)}。${next.level===1?'有了屋顶。':'房屋等级提升。'}`,kind:'home'},...v]);
-    if (next.level === 1) grant(['first-room']);
+    const unlocked = [] as string[];
+    if (next.level === 1) unlocked.push('first-room');
+    if (!rooms.includes('kitchen') && next.rooms.includes('kitchen')) unlocked.push('first-kitchen');
+    if (unlocked.length) grant(unlocked);
     setHouseUpgrade({ from: houseTierAt(houseLevel), to: next });
   }
   function hire(id:string,cost:number) {
